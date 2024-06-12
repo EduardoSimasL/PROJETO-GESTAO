@@ -6,11 +6,15 @@ $dbname = "SGN.db";
 $database = new Database($dbname);
 $aluno = new Aluno($database);
 
-$data = json_decode(file_get_contents('php://input'), true);
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['ID'])) {
+    $alunoID = $_POST['ID'];
 
-if ($aluno->excluirAluno($data['ID'])) {
-    echo json_encode(['success' => true]);
+    if ($aluno->excluirAluno($alunoID)) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Erro ao excluir aluno.']);
+    }
 } else {
-    echo json_encode(['success' => false]);
+    echo json_encode(['success' => false, 'message' => 'Dados inválidos recebidos.']);
 }
 ?>

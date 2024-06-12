@@ -10,8 +10,6 @@ $nota = new Nota($database);
 
 $alunos = $aluno->listarTodos();
 
-//var_dump($alunos);
-
 function calcularMedia($nota1, $nota2) {
     return ($nota1 + $nota2) / 2;
 }
@@ -71,45 +69,50 @@ function calcularStatus($media_final) {
     </thead>
     <tbody>
     <?php foreach ($alunos as $aluno):
-$notas = $nota->obterNotas($aluno['ID']);
-// Inicializa as notas com 'N/A' se não houver notas associadas
-if (!$notas) {
-    $notas = array(
-        'nota_prova1' => 0,
-        'nota_aep1' => 0,
-        'nota_integrada_1' => 0,
-        'nota_prova2' => 0,
-        'nota_aep2' => 0,
-        'nota_integrada_2' => 0
-    );
-}
-// Calcular médias
-$media1 = calcularMedia(floatval($notas['nota_prova1']), floatval($notas['nota_aep1']) + floatval($notas['nota_integrada_1']));
-$media2 = calcularMedia(floatval($notas['nota_prova2']), floatval($notas['nota_aep2']) + floatval($notas['nota_integrada_2']));
-$media_final = calcularMedia($media1, $media2);
-// Calcular status
-$status = calcularStatus($media_final);
-?>
-  <tr>
-    <td><?php echo htmlspecialchars($aluno['nome']); ?></td>
-    <td><?php echo htmlspecialchars($aluno['RA']); ?></td>
-    <td><?php echo htmlspecialchars($aluno['email']); ?></td>
-    <td><?php echo htmlspecialchars($notas['nota_prova1']); ?></td>
-    <td><?php echo htmlspecialchars($notas['nota_aep1']); ?></td>
-    <td><?php echo htmlspecialchars($notas['nota_integrada_1']); ?></td>
-    <td><?php echo htmlspecialchars($notas['nota_prova2']); ?></td>
-    <td><?php echo htmlspecialchars($notas['nota_aep2']); ?></td>
-    <td><?php echo htmlspecialchars($notas['nota_integrada_2']); ?></td>
-    <td><?php echo htmlspecialchars($media1); ?></td>
-    <td><?php echo htmlspecialchars($media2); ?></td>
-    <td><?php echo htmlspecialchars($media_final); ?></td>
-    <td class="<?php echo strtolower($status); ?>"><?php echo htmlspecialchars($status); ?></td>
-    <td><a href="editar.php?id=<?php echo $aluno['ID']; ?>">Editar</a> | <a href="deletar.php?id=<?php echo $aluno['ID']; ?>">Deletar</a></td>
-  </tr>
-<?php endforeach; ?>
-</tbody>
-</table>
+        $notas = $nota->obterNotas($aluno['ID']);
+        // Inicializa as notas com 'N/A' se não houver notas associadas
+        if (!$notas) {
+            $notas = array(
+                'nota_prova1' => 0,
+                'nota_aep1' => 0,
+                'nota_integrada_1' => 0,
+                'nota_prova2' => 0,
+                'nota_aep2' => 0,
+                'nota_integrada_2' => 0
+            );
+        }
+        // Calcular médias corretamente
+        $media1 = calcularMedia(floatval($notas['nota_prova1']), (floatval($notas['nota_aep1']) + floatval($notas['nota_integrada_1'])) / 2);
+        $media2 = calcularMedia(floatval($notas['nota_prova2']), (floatval($notas['nota_aep2']) + floatval($notas['nota_integrada_2'])) / 2);
+        $media_final = calcularMedia($media1, $media2);
+        // Calcular status
+        $status = calcularStatus($media_final);
+    ?>
+      <tr>
+        <td><?php echo htmlspecialchars($aluno['nome']); ?></td>
+        <td><?php echo htmlspecialchars($aluno['RA']); ?></td>
+        <td><?php echo htmlspecialchars($aluno['email']); ?></td>
+        <td><?php echo htmlspecialchars($notas['nota_prova1']); ?></td>
+        <td><?php echo htmlspecialchars($notas['nota_aep1']); ?></td>
+        <td><?php echo htmlspecialchars($notas['nota_integrada_1']); ?></td>
+        <td><?php echo htmlspecialchars($notas['nota_prova2']); ?></td>
+        <td><?php echo htmlspecialchars($notas['nota_aep2']); ?></td>
+        <td><?php echo htmlspecialchars($notas['nota_integrada_2']); ?></td>
+        <td><?php echo htmlspecialchars($media1); ?></td>
+        <td><?php echo htmlspecialchars($media2); ?></td>
+        <td><?php echo htmlspecialchars($media_final); ?></td>
+        <td class="<?php echo strtolower($status); ?>"><?php echo htmlspecialchars($status); ?></td>
+        <td>
+          <form action="deletar.php" method="post">
+            <input type="hidden" name="ID" value="<?php echo $aluno['ID']; ?>">
+            <button type="submit">Excluir</button>
+          </form>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
 
-<script src="js/script.js"></script>
+  <script src="js/script.js"></script>
 </body>
 </html>

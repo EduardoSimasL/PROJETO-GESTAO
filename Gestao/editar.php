@@ -35,24 +35,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nota_aep2 = $_POST['nota_aep2'];
     $nota_integrada_2 = $_POST['nota_integrada_2'];
 
-    // Atualize as notas do aluno
-    $dados = array(
-        'nota_prova1' => $nota_prova1,
-        'nota_aep1' => $nota_aep1,
-        'nota_integrada_1' => $nota_integrada_1,
-        'nota_prova2' => $nota_prova2,
-        'nota_aep2' => $nota_aep2,
-        'nota_integrada_2' => $nota_integrada_2
-    );
+    // Calcular as médias bimestrais
+    $media_bimestre1 = $nota->calcularMediaBimestral1($nota_prova1, $nota_aep1, $nota_integrada_1);
+    $media_bimestre2 = $nota->calcularMediaBimestral2($nota_prova2, $nota_aep2, $nota_integrada_2);
 
-    $success = $nota->atualizarNota($id_aluno, $dados);
+    // Calcular a média final
+    $media_final = $nota->calcularMediaFinal($media_bimestre1, $media_bimestre2);
+
+    // Verifique se o aluno já tem notas
+    $notas_existentes = $nota->obterNotas($id_aluno);
+
+    if ($notas_existentes) {
+        // Atualize as notas do aluno
+        $dados = array(
+            'nota_prova1' => $nota_prova1,
+            'nota_aep1' => $nota_aep1,
+            'nota_integrada_1' => $nota_integrada_1,
+            'nota_prova2' => $nota_prova2,
+            'nota_aep2' => $nota_aep2,
+            'nota_integrada_2' => $nota_integrada_2
+        );
+
+        $success = $nota->atualizarNota($id_aluno, $dados);
+    } else {
+        // Insira novas notas para o aluno
+        $success = $nota->inserirNotas($id_aluno, $nota_prova1, $nota_aep1, $nota_integrada_1, $nota_prova2, $nota_aep2, $nota_integrada_2);
+    }
+
     if ($success) {
-        // Redirecione de volta para a lista após a atualização bem-sucedida
+        // Redirecione de volta para a lista após a atualização/inserção bem-sucedida
         header('Location: lista.php');
         exit();
     } else {
         // Trate o erro, se houver
-        $error_message = "Erro ao atualizar as notas.";
+        $error_message = "Erro ao atualizar/inserir as notas.";
     }
 }
 
@@ -70,6 +86,11 @@ if (!$notas) {
         'nota_integrada_2' => 0
     );
 }
+
+// Calcular as médias para exibição
+$media_bimestre1 = $nota->calcularMediaBimestral1($notas['nota_prova1'], $notas['nota_aep1'], $notas['nota_integrada_1']);
+$media_bimestre2 = $nota->calcularMediaBimestral2($notas['nota_prova2'], $notas['nota_aep2'], $notas['nota_integrada_2']);
+$media_final = $nota->calcularMediaFinal($media_bimestre1, $media_bimestre2);
 ?>
 
 <!DOCTYPE html>
@@ -105,22 +126,22 @@ if (!$notas) {
     
     <h2>Notas</h2>
     <label for="nota_prova1">Nota Prova 1:</label>
-    <input type="number" id="nota_prova1" name="nota_prova1" min="0" max="10" step="0.1" value="<?php echo $notas['nota_prova1']; ?>" required>
+    <input type="number" id="nota_prova1" name="nota_prova1" min="0" max="10" step="0.1" value="<?php echo htmlspecialchars($notas['nota_prova1']); ?>" required>
     <br>
     <label for="nota_aep1">Nota AEP 1:</label>
-    <input type="number" id="nota_aep1" name="nota_aep1" min="0" max="10" step="0.1" value="<?php echo $notas['nota_aep1']; ?>" required>
+    <input type="number" id="nota_aep1" name="nota_aep1" min="0" max="10" step="0.1" value="<?php echo htmlspecialchars($notas['nota_aep1']); ?>" required>
     <br>
     <label for="nota_integrada_1">Nota Prova Integrada 1:</label>
-    <input type="number" id="nota_integrada_1" name="nota_integrada_1" min="0" max="10" step="0.1" value="<?php echo $notas['nota_integrada_1']; ?>" required>
+    <input type="number" id="nota_integrada_1" name="nota_integrada_1" min="0" max="10" step="0.1" value="<?php echo htmlspecialchars($notas['nota_integrada_1']); ?>" required>
     <br>
     <label for="nota_prova2">Nota Prova 2:</label>
-    <input type="number" id="nota_prova2" name="nota_prova2" min="0" max="10" step="0.1" value="<?php echo $notas['nota_prova2']; ?>" required>
+    <input type="number" id="nota_prova2" name="nota_prova2" min="0" max="10" step="0.1" value="<?php echo htmlspecialchars($notas['nota_prova2']); ?>" required>
     <br>
     <label for="nota_aep2">Nota AEP 2:</label>
-    <input type="number" id="nota_aep2" name="nota_aep2" min="0" max="10" step="0.1" value="<?php echo $notas['nota_aep2']; ?>" required>
+    <input type="number" id="nota_aep2" name="nota_aep2" min="0" max="10" step="0.1" value="<?php echo htmlspecialchars($notas['nota_aep2']); ?>" required>
     <br>
     <label for="nota_integrada_2">Nota Prova Integrada 2:</label>
-    <input type="number" id="nota_integrada_2" name="nota_integrada_2" min="0" max="10" step="0.1" value="<?php echo $notas['nota_integrada_2']; ?>" required>
+    <input type="number" id="nota_integrada_2" name="nota_integrada_2" min="0" max="10" step="0.1" value="<?php echo htmlspecialchars($notas['nota_integrada_2']); ?>" required>
     <br>
     <button type="submit">Salvar Notas</button>
   </form>
